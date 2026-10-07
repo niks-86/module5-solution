@@ -41,6 +41,15 @@ $(function () {
     "snippets/menu-item.html";
 
 
+  // Stores all categories
+  var currentCategories = [];
+
+
+  // Stores the currently selected random category
+  var currentSpecialShortName = "";
+
+
+  // Convenience function for inserting HTML
   var insertHtml = function (selector, html) {
 
     var targetElem =
@@ -55,6 +64,7 @@ $(function () {
   };
 
 
+  // Show loading icon
   var showLoading = function (selector) {
 
     var html =
@@ -74,6 +84,7 @@ $(function () {
   };
 
 
+  // Replace {{property}} with value
   var insertProperty =
     function (string, propName, propValue) {
 
@@ -91,59 +102,67 @@ $(function () {
     };
 
 
+  // Remove active from Home
+  // and activate Menu
   var switchMenuToActive = function () {
 
-    var classes =
+    var homeButton =
       document.querySelector(
         "#navHomeButton"
-      ).className;
-
-    classes =
-      classes.replace(
-        new RegExp("active", "g"),
-        ""
       );
 
-    document.querySelector(
-      "#navHomeButton"
-    ).className = classes;
-
-
-    classes =
+    var menuButton =
       document.querySelector(
         "#navMenuButton"
-      ).className;
+      );
 
 
-    if (classes.indexOf("active") === -1) {
+    if (homeButton) {
 
-      classes += " active";
+      var classes =
+        homeButton.className;
 
-      document.querySelector(
-        "#navMenuButton"
-      ).className = classes;
+      classes =
+        classes.replace(
+          new RegExp("active", "g"),
+          ""
+        );
+
+      homeButton.className =
+        classes;
+
+    }
+
+
+    if (menuButton) {
+
+      var menuClasses =
+        menuButton.className;
+
+      if (
+        menuClasses.indexOf("active") === -1
+      ) {
+
+        menuClasses +=
+          " active";
+
+        menuButton.className =
+          menuClasses;
+
+      }
 
     }
 
   };
 
 
+  // Page loaded
   document.addEventListener(
     "DOMContentLoaded",
     function (event) {
 
-      console.log(
-        "SCRIPT.JS LOADED"
-      );
-
-
       showLoading(
         "#main-content"
-      );
-
-
-      console.log(
-        "REQUESTING CATEGORIES..."
       );
 
 
@@ -162,12 +181,21 @@ $(function () {
   );
 
 
+  // Build Home Page
   function buildAndShowHomeHTML(categories) {
 
-    console.log(
-      "CATEGORIES RECEIVED:",
-      categories
-    );
+    currentCategories =
+      categories;
+
+
+    var chosenCategory =
+      chooseRandomCategory(
+        categories
+      );
+
+
+    currentSpecialShortName =
+      chosenCategory.short_name;
 
 
     $ajaxUtils.sendGetRequest(
@@ -175,27 +203,6 @@ $(function () {
       homeHtmlUrl,
 
       function (homeHtml) {
-
-        console.log(
-          "HOME SNIPPET RECEIVED"
-        );
-
-
-        var chosenCategory =
-          chooseRandomCategory(
-            categories
-          );
-
-
-        var chosenCategoryShortName =
-          chosenCategory.short_name;
-
-
-        console.log(
-          "RANDOM CATEGORY:",
-          chosenCategoryShortName
-        );
-
 
         var homeHtmlToInsertIntoMainPage =
           insertProperty(
@@ -205,21 +212,18 @@ $(function () {
             "randomCategoryShortName",
 
             "'" +
-            chosenCategoryShortName +
+            chosenCategory.short_name +
             "'"
 
           );
 
 
-        console.log(
-          "FINAL HOME HTML:",
-          homeHtmlToInsertIntoMainPage
-        );
-
-
         insertHtml(
+
           "#main-content",
+
           homeHtmlToInsertIntoMainPage
+
         );
 
       },
@@ -231,6 +235,7 @@ $(function () {
   }
 
 
+  // Choose random category
   function chooseRandomCategory(categories) {
 
     var randomArrayIndex =
@@ -247,6 +252,106 @@ $(function () {
   }
 
 
+  // Choose a random category
+  // different from the current one
+  function chooseDifferentRandomCategory(
+    categories,
+    currentShortName
+  ) {
+
+    if (categories.length <= 1) {
+
+      return categories[0];
+
+    }
+
+
+    var chosenCategory;
+
+
+    do {
+
+      chosenCategory =
+        chooseRandomCategory(
+          categories
+        );
+
+    }
+
+    while (
+      chosenCategory.short_name ===
+      currentShortName
+    );
+
+
+    return chosenCategory;
+
+  }
+
+
+  // RANDOM AGAIN
+  dc.randomizeSpecials =
+    function () {
+
+      if (
+        !currentCategories ||
+        currentCategories.length === 0
+      ) {
+
+        $ajaxUtils.sendGetRequest(
+
+          allCategoriesUrl,
+
+          function (categories) {
+
+            currentCategories =
+              categories;
+
+
+            loadRandomSpecial();
+
+          },
+
+          true
+
+        );
+
+
+        return;
+
+      }
+
+
+      loadRandomSpecial();
+
+    };
+
+
+  // Load another random special
+  function loadRandomSpecial() {
+
+    var chosenCategory =
+      chooseDifferentRandomCategory(
+
+        currentCategories,
+
+        currentSpecialShortName
+
+      );
+
+
+    currentSpecialShortName =
+      chosenCategory.short_name;
+
+
+    dc.loadMenuItems(
+      chosenCategory.short_name
+    );
+
+  }
+
+
+  // Load Menu Categories
   dc.loadMenuCategories =
     function () {
 
@@ -266,12 +371,17 @@ $(function () {
     };
 
 
+  // Load Menu Items
   dc.loadMenuItems =
     function (categoryShort) {
 
       showLoading(
         "#main-content"
       );
+
+
+      currentSpecialShortName =
+        categoryShort;
 
 
       $ajaxUtils.sendGetRequest(
@@ -287,7 +397,10 @@ $(function () {
     };
 
 
-  function buildAndShowCategoriesHTML(categories) {
+  // Build Categories Page
+  function buildAndShowCategoriesHTML(
+    categories
+  ) {
 
     $ajaxUtils.sendGetRequest(
 
@@ -339,6 +452,7 @@ $(function () {
   }
 
 
+  // Build Categories View
   function buildCategoriesViewHtml(
     categories,
     categoriesTitleHtml,
@@ -364,7 +478,8 @@ $(function () {
 
 
       var name =
-        "" + categories[i].name;
+        "" +
+        categories[i].name;
 
 
       var short_name =
@@ -402,6 +517,7 @@ $(function () {
   }
 
 
+  // Build Menu Items Page
   function buildAndShowMenuItemsHTML(
     categoryMenuItems
   ) {
@@ -456,6 +572,7 @@ $(function () {
   }
 
 
+  // Build Menu Items View
   function buildMenuItemsViewHtml(
     categoryMenuItems,
     menuItemsTitleHtml,
@@ -490,10 +607,40 @@ $(function () {
       menuItemsTitleHtml;
 
 
+    // RANDOM AGAIN BUTTON
+    finalHtml +=
+      "<div style='" +
+      "text-align:center;" +
+      "margin:20px 0;" +
+      "'>" +
+
+      "<button " +
+      "type='button' " +
+
+      "onclick='$dc.randomizeSpecials();' " +
+
+      "style='" +
+      "padding:10px 25px;" +
+      "background-color:#61122f;" +
+      "color:white;" +
+      "border:none;" +
+      "cursor:pointer;" +
+      "font-size:16px;" +
+      "border-radius:4px;" +
+      "'>" +
+
+      "Random Again" +
+
+      "</button>" +
+
+      "</div>";
+
+
     finalHtml +=
       "<section class='row'>";
 
 
+    // Menu Items
     var menuItems =
       categoryMenuItems.menu_items;
 
@@ -514,72 +661,108 @@ $(function () {
 
       html =
         insertProperty(
+
           html,
+
           "short_name",
+
           menuItems[i].short_name
+
         );
 
 
       html =
         insertProperty(
+
           html,
+
           "catShortName",
+
           catShortName
+
         );
 
 
       html =
         insertItemPrice(
+
           html,
+
           "price_small",
+
           menuItems[i].price_small
+
         );
 
 
       html =
         insertItemPortionName(
+
           html,
+
           "small_portion_name",
+
           menuItems[i].small_portion_name
+
         );
 
 
       html =
         insertItemPrice(
+
           html,
+
           "price_large",
+
           menuItems[i].price_large
+
         );
 
 
       html =
         insertItemPortionName(
+
           html,
+
           "large_portion_name",
+
           menuItems[i].large_portion_name
+
         );
 
 
       html =
         insertProperty(
+
           html,
+
           "name",
+
           menuItems[i].name
+
         );
 
 
       html =
         insertProperty(
+
           html,
+
           "description",
+
           menuItems[i].description
+
         );
 
 
+      // Clear after every second item
       if (i % 2 !== 0) {
 
         html +=
-          "<div class='clearfix visible-lg-block visible-md-block'></div>";
+          "<div class='clearfix " +
+          "visible-lg-block " +
+          "visible-md-block'>" +
+          "</div>";
 
       }
 
@@ -599,6 +782,7 @@ $(function () {
   }
 
 
+  // Insert Price
   function insertItemPrice(
     html,
     pricePropName,
@@ -608,9 +792,13 @@ $(function () {
     if (!priceValue) {
 
       return insertProperty(
+
         html,
+
         pricePropName,
+
         ""
+
       );
 
     }
@@ -623,9 +811,13 @@ $(function () {
 
     html =
       insertProperty(
+
         html,
+
         pricePropName,
+
         priceValue
+
       );
 
 
@@ -634,6 +826,7 @@ $(function () {
   }
 
 
+  // Insert Portion Name
   function insertItemPortionName(
     html,
     portionPropName,
@@ -643,9 +836,13 @@ $(function () {
     if (!portionValue) {
 
       return insertProperty(
+
         html,
+
         portionPropName,
+
         ""
+
       );
 
     }
@@ -659,9 +856,13 @@ $(function () {
 
     html =
       insertProperty(
+
         html,
+
         portionPropName,
+
         portionValue
+
       );
 
 
@@ -670,6 +871,9 @@ $(function () {
   }
 
 
-  global.$dc = dc;
+  // Expose dc
+  global.$dc =
+    dc;
+
 
 })(window);
