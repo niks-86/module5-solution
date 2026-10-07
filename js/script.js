@@ -2,8 +2,9 @@
 $(function () {
   $("#navbarToggle").blur(function (event) {
     var screenWidth = window.innerWidth;
+
     if (screenWidth < 768) {
-      $("#collapsable-nav").collapse('hide');
+      $("#collapsable-nav").collapse("hide");
     }
   });
 });
@@ -12,45 +13,76 @@ $(function () {
 (function (global) {
 
 var dc = {};
+
 var homeHtmlUrl = "snippets/home-snippet.html";
+
 var allCategoriesUrl =
   "https://coursera-jhu-default-rtdb.firebaseio.com/categories.json";
-var categoriesTitleHtml = "snippets/categories-title-snippet.html";
-var categoryHtml = "snippets/category-snippet.html";
+
+var categoriesTitleHtml =
+  "snippets/categories-title-snippet.html";
+
+var categoryHtml =
+  "snippets/category-snippet.html";
+
 var menuItemsUrl =
   "https://coursera-jhu-default-rtdb.firebaseio.com/menu_items/";
-var menuItemsTitleHtml = "snippets/menu-items-title.html";
-var menuItemHtml = "snippets/menu-item.html";
 
-var currentRandomCategory = "";
+var menuItemsTitleHtml =
+  "snippets/menu-items-title.html";
+
+var menuItemHtml =
+  "snippets/menu-item.html";
+
 
 var insertHtml = function (selector, html) {
   var targetElem = document.querySelector(selector);
   targetElem.innerHTML = html;
 };
 
+
 var showLoading = function (selector) {
   var html = "<div class='text-center'>";
-  html += "<img src='images/ajax-loader.gif'></div>";
+  html += "<img src='images/ajax-loader.gif'>";
+  html += "</div>";
+
   insertHtml(selector, html);
 };
 
+
 var insertProperty = function (string, propName, propValue) {
   var propToReplace = "{{" + propName + "}}";
-  string = string
-    .replace(new RegExp(propToReplace, "g"), propValue);
+
+  string = string.replace(
+    new RegExp(propToReplace, "g"),
+    propValue
+  );
+
   return string;
 };
 
-var switchMenuToActive = function () {
-  var classes = document.querySelector("#navHomeButton").className;
-  classes = classes.replace(new RegExp("active", "g"), "");
-  document.querySelector("#navHomeButton").className = classes;
 
-  classes = document.querySelector("#navMenuButton").className;
+var switchMenuToActive = function () {
+
+  var classes =
+    document.querySelector("#navHomeButton").className;
+
+  classes =
+    classes.replace(new RegExp("active", "g"), "");
+
+  document.querySelector("#navHomeButton").className =
+    classes;
+
+
+  classes =
+    document.querySelector("#navMenuButton").className;
+
   if (classes.indexOf("active") === -1) {
+
     classes += " active";
-    document.querySelector("#navMenuButton").className = classes;
+
+    document.querySelector("#navMenuButton").className =
+      classes;
   }
 };
 
@@ -62,37 +94,63 @@ document.addEventListener("DOMContentLoaded", function (event) {
   $ajaxUtils.sendGetRequest(
     allCategoriesUrl,
     buildAndShowHomeHTML,
-    true);
+    true
+  );
 
 });
 
 
-function buildAndShowHomeHTML (categories) {
+function buildAndShowHomeHTML(categories) {
 
   $ajaxUtils.sendGetRequest(
     homeHtmlUrl,
+
     function (homeHtml) {
 
-      var chosenCategoryShortName =
-        chooseRandomCategory(categories).short_name;
+      var randomCategory =
+        chooseRandomCategory(categories);
 
-      currentRandomCategory = chosenCategoryShortName;
+      var randomCategoryShortName =
+        randomCategory.short_name;
+
+      var randomCategoryName =
+        randomCategory.name;
+
 
       var homeHtmlToInsertIntoMainPage =
-        insertProperty(homeHtml,
-                       "randomCategoryShortName",
-                       "'" + chosenCategoryShortName + "'");
+        insertProperty(
+          homeHtml,
+          "randomCategoryShortName",
+          "'" + randomCategoryShortName + "'"
+        );
 
-      insertHtml("#main-content", homeHtmlToInsertIntoMainPage);
+
+      homeHtmlToInsertIntoMainPage =
+        insertProperty(
+          homeHtmlToInsertIntoMainPage,
+          "randomCategoryName",
+          randomCategoryName
+        );
+
+
+      insertHtml(
+        "#main-content",
+        homeHtmlToInsertIntoMainPage
+      );
+
     },
-    false);
+
+    false
+  );
 }
 
 
-function chooseRandomCategory (categories) {
+function chooseRandomCategory(categories) {
 
   var randomArrayIndex =
-    Math.floor(Math.random() * categories.length);
+    Math.floor(
+      Math.random() * categories.length
+    );
 
   return categories[randomArrayIndex];
 }
@@ -102,35 +160,48 @@ dc.randomizeSpecials = function () {
 
   $ajaxUtils.sendGetRequest(
     allCategoriesUrl,
+
     function (categories) {
 
-      var newCategory =
-        chooseRandomCategory(categories).short_name;
+      var randomCategory =
+        chooseRandomCategory(categories);
 
-      currentRandomCategory = newCategory;
+      var randomCategoryShortName =
+        randomCategory.short_name;
+
+      var randomCategoryName =
+        randomCategory.name;
+
 
       var specialsLink =
         document.querySelector("#specials-link");
 
-      if (specialsLink) {
-        specialsLink.setAttribute(
-          "onclick",
-          "$dc.loadMenuItems('" + newCategory + "'); return false;"
-        );
+
+      specialsLink.setAttribute(
+        "onclick",
+        "$dc.loadMenuItems('" +
+        randomCategoryShortName +
+        "'); return false;"
+      );
+
+
+      var specialsName =
+        document.querySelector("#random-specials-name");
+
+
+      if (specialsName) {
+
+        specialsName.innerHTML =
+          "Random Pick: " +
+          randomCategoryName;
+
       }
 
-      var specialsTile =
-        document.querySelector("#specials-tile");
-
-      if (specialsTile) {
-        specialsTile.classList.remove("random-again-animation");
-
-        void specialsTile.offsetWidth;
-
-        specialsTile.classList.add("random-again-animation");
-      }
     },
-    true);
+
+    true
+  );
+
 };
 
 
@@ -140,7 +211,9 @@ dc.loadMenuCategories = function () {
 
   $ajaxUtils.sendGetRequest(
     allCategoriesUrl,
-    buildAndShowCategoriesHTML);
+    buildAndShowCategoriesHTML
+  );
+
 };
 
 
@@ -149,19 +222,26 @@ dc.loadMenuItems = function (categoryShort) {
   showLoading("#main-content");
 
   $ajaxUtils.sendGetRequest(
-    menuItemsUrl + categoryShort + ".json",
-    buildAndShowMenuItemsHTML);
+    menuItemsUrl +
+    categoryShort +
+    ".json",
+
+    buildAndShowMenuItemsHTML
+  );
+
 };
 
 
-function buildAndShowCategoriesHTML (categories) {
+function buildAndShowCategoriesHTML(categories) {
 
   $ajaxUtils.sendGetRequest(
     categoriesTitleHtml,
+
     function (categoriesTitleHtml) {
 
       $ajaxUtils.sendGetRequest(
         categoryHtml,
+
         function (categoryHtml) {
 
           switchMenuToActive();
@@ -170,15 +250,25 @@ function buildAndShowCategoriesHTML (categories) {
             buildCategoriesViewHtml(
               categories,
               categoriesTitleHtml,
-              categoryHtml);
+              categoryHtml
+            );
+
 
           insertHtml(
             "#main-content",
-            categoriesViewHtml);
+            categoriesViewHtml
+          );
+
         },
-        false);
+
+        false
+      );
+
     },
-    false);
+
+    false
+  );
+
 }
 
 
@@ -187,63 +277,100 @@ function buildCategoriesViewHtml(
   categoriesTitleHtml,
   categoryHtml) {
 
-  var finalHtml = categoriesTitleHtml;
+  var finalHtml =
+    categoriesTitleHtml;
 
-  finalHtml += "<section class='row'>";
 
-  for (var i = 0; i < categories.length; i++) {
+  finalHtml +=
+    "<section class='row'>";
 
-    var html = categoryHtml;
 
-    var name = "" + categories[i].name;
-    var short_name = categories[i].short_name;
+  for (
+    var i = 0;
+    i < categories.length;
+    i++
+  ) {
+
+    var html =
+      categoryHtml;
+
+
+    var name =
+      "" + categories[i].name;
+
+
+    var short_name =
+      categories[i].short_name;
+
 
     html =
       insertProperty(
         html,
         "name",
-        name);
+        name
+      );
+
 
     html =
       insertProperty(
         html,
         "short_name",
-        short_name);
+        short_name
+      );
+
 
     finalHtml += html;
+
   }
 
-  finalHtml += "</section>";
+
+  finalHtml +=
+    "</section>";
+
 
   return finalHtml;
 }
 
 
-function buildAndShowMenuItemsHTML (categoryMenuItems) {
+function buildAndShowMenuItemsHTML(
+  categoryMenuItems) {
 
   $ajaxUtils.sendGetRequest(
     menuItemsTitleHtml,
+
     function (menuItemsTitleHtml) {
 
       $ajaxUtils.sendGetRequest(
         menuItemHtml,
+
         function (menuItemHtml) {
 
           switchMenuToActive();
+
 
           var menuItemsViewHtml =
             buildMenuItemsViewHtml(
               categoryMenuItems,
               menuItemsTitleHtml,
-              menuItemHtml);
+              menuItemHtml
+            );
+
 
           insertHtml(
             "#main-content",
-            menuItemsViewHtml);
+            menuItemsViewHtml
+          );
+
         },
-        false);
+
+        false
+      );
+
     },
-    false);
+
+    false
+  );
+
 }
 
 
@@ -252,86 +379,129 @@ function buildMenuItemsViewHtml(
   menuItemsTitleHtml,
   menuItemHtml) {
 
+
   menuItemsTitleHtml =
     insertProperty(
       menuItemsTitleHtml,
       "name",
-      categoryMenuItems.category.name);
+      categoryMenuItems.category.name
+    );
+
 
   menuItemsTitleHtml =
     insertProperty(
       menuItemsTitleHtml,
       "special_instructions",
-      categoryMenuItems.category.special_instructions);
+      categoryMenuItems.category.special_instructions
+    );
 
-  var finalHtml = menuItemsTitleHtml;
 
-  finalHtml += "<section class='row'>";
+  var finalHtml =
+    menuItemsTitleHtml;
 
-  var menuItems = categoryMenuItems.menu_items;
-  var catShortName = categoryMenuItems.category.short_name;
 
-  for (var i = 0; i < menuItems.length; i++) {
+  finalHtml +=
+    "<section class='row'>";
 
-    var html = menuItemHtml;
+
+  var menuItems =
+    categoryMenuItems.menu_items;
+
+
+  var catShortName =
+    categoryMenuItems.category.short_name;
+
+
+  for (
+    var i = 0;
+    i < menuItems.length;
+    i++
+  ) {
+
+    var html =
+      menuItemHtml;
+
 
     html =
       insertProperty(
         html,
         "short_name",
-        menuItems[i].short_name);
+        menuItems[i].short_name
+      );
+
 
     html =
       insertProperty(
         html,
         "catShortName",
-        catShortName);
+        catShortName
+      );
+
 
     html =
       insertItemPrice(
         html,
         "price_small",
-        menuItems[i].price_small);
+        menuItems[i].price_small
+      );
+
 
     html =
       insertItemPortionName(
         html,
         "small_portion_name",
-        menuItems[i].small_portion_name);
+        menuItems[i].small_portion_name
+      );
+
 
     html =
       insertItemPrice(
         html,
         "price_large",
-        menuItems[i].price_large);
+        menuItems[i].price_large
+      );
+
 
     html =
       insertItemPortionName(
         html,
         "large_portion_name",
-        menuItems[i].large_portion_name);
+        menuItems[i].large_portion_name
+      );
+
 
     html =
       insertProperty(
         html,
         "name",
-        menuItems[i].name);
+        menuItems[i].name
+      );
+
 
     html =
       insertProperty(
         html,
         "description",
-        menuItems[i].description);
+        menuItems[i].description
+      );
+
 
     if (i % 2 !== 0) {
+
       html +=
         "<div class='clearfix visible-lg-block visible-md-block'></div>";
+
     }
 
+
     finalHtml += html;
+
   }
 
-  finalHtml += "</section>";
+
+  finalHtml +=
+    "</section>";
+
 
   return finalHtml;
 }
@@ -343,19 +513,27 @@ function insertItemPrice(
   priceValue) {
 
   if (!priceValue) {
+
     return insertProperty(
       html,
       pricePropName,
-      "");
+      ""
+    );
+
   }
 
-  priceValue = "$" + priceValue.toFixed(2);
+
+  priceValue =
+    "$" + priceValue.toFixed(2);
+
 
   html =
     insertProperty(
       html,
       pricePropName,
-      priceValue);
+      priceValue
+    );
+
 
   return html;
 }
@@ -367,19 +545,27 @@ function insertItemPortionName(
   portionValue) {
 
   if (!portionValue) {
+
     return insertProperty(
       html,
       portionPropName,
-      "");
+      ""
+    );
+
   }
 
-  portionValue = "(" + portionValue + ")";
+
+  portionValue =
+    "(" + portionValue + ")";
+
 
   html =
     insertProperty(
       html,
       portionPropName,
-      portionValue);
+      portionValue
+    );
+
 
   return html;
 }
