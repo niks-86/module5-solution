@@ -1,35 +1,64 @@
 ```html
 <div class="jumbotron">
-  <img src="images/jumbotron_768.jpg"
-       alt="Picture of restaurant"
-       class="img-responsive visible-xs">
+
+  <img
+    src="images/jumbotron_768.jpg"
+    alt="Picture of restaurant"
+    class="img-responsive visible-xs">
+
 </div>
+
 
 <div id="home-tiles" class="row">
 
+
   <div class="col-md-4 col-sm-6 col-xs-12">
-    <a href="#" onclick="$dc.loadMenuCategories();">
+
+    <a
+      href="#"
+      onclick="$dc.loadMenuCategories();">
+
       <div id="menu-tile">
+
         <span>menu</span>
+
       </div>
+
     </a>
+
   </div>
 
+
   <div class="col-md-4 col-sm-6 col-xs-12">
 
-    <a id="specials-link"
-       href="#"
-       onclick="$dc.loadMenuItems({{randomCategoryShortName}}); return false;">
+    <a
+      id="specials-link"
+      href="#"
+      onclick="$dc.loadMenuItems({{randomCategoryShortName}}); return false;">
 
       <div id="specials-tile">
+
         <span>specials</span>
+
       </div>
 
     </a>
+
+
+    <div
+      id="random-specials-name"
+      class="text-center"
+      style="margin-top: 10px; margin-bottom: 10px; font-weight: bold;">
+
+      Random Pick: {{randomCategoryName}}
+
+    </div>
+
 
     <button
       type="button"
-      class="btn btn-default btn-block"
+      id="random-again-button"
+      class="btn btn-primary btn-block"
       onclick="$dc.randomizeSpecials();">
 
       Random Again
@@ -38,10 +67,12 @@
 
   </div>
 
+
   <div class="col-md-4 col-sm-12 col-xs-12">
 
-    <a href="https://www.google.com/maps/place/David+Chu's+China+Bistro/@39.3635874,-76.7138622,17z/data=!4m6!1m3!3m2!1s0x89c81a14e7817803:0xab20a0e99daa17ea!2sDavid+Chu's+China+Bistro!3m1!1s0x89c81a14e7817803:0xab20a0e99daa17ea"
-       target="_blank">
+    <a
+      href="https://www.google.com/maps/place/David+Chu's+China+Bistro/@39.3635874,-76.7138622,17z"
+      target="_blank">
 
       <div id="map-tile">
 
@@ -54,6 +85,7 @@
           allowfullscreen>
         </iframe>
 
+
         <span>map</span>
 
       </div>
@@ -61,6 +93,7 @@
     </a>
 
   </div>
+
 
 </div>
 ```
