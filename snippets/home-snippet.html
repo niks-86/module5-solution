@@ -1,17 +1,20 @@
-```html
 <div class="jumbotron">
-  <img src="images/jumbotron_768.jpg" alt="Picture of restaurant" class="img-responsive visible-xs">
+  <img src="images/jumbotron_768.jpg"
+       alt="Picture of restaurant"
+       class="img-responsive visible-xs">
 </div>
 
 <div id="home-tiles" class="row">
 
   <div class="col-md-4 col-sm-6 col-xs-12">
-    <a href="#" onclick="$dc.loadMenuCategories();">
+    <a href="#"
+       onclick="$dc.loadMenuCategories(); return false;">
       <div id="menu-tile">
         <span>menu</span>
       </div>
     </a>
   </div>
+
 
   <div class="col-md-4 col-sm-6 col-xs-12">
 
@@ -25,20 +28,42 @@
 
     </a>
 
+
+    <div id="random-specials-text"
+         style="
+           text-align: center;
+           margin-top: 10px;
+           margin-bottom: 10px;
+           font-weight: bold;
+         ">
+      Random Special
+    </div>
+
+
     <button
       type="button"
       onclick="$dc.randomizeSpecials();"
-      style="width: 100%; margin-top: 10px; padding: 10px; font-size: 16px; cursor: pointer;">
-
+      style="
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        margin-bottom: 10px;
+        background-color: #61122f;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+      ">
       Random Again
-
     </button>
 
   </div>
 
+
   <div class="col-md-4 col-sm-12 col-xs-12">
 
-    <a href="https://www.google.com/maps/place/David+Chu's+China+Bistro/@39.3635874,-76.7138622,17z"
+    <a href="https://www.google.com/maps/place/David+Chu's+China+Bistro/@39.3635874,-76.7138622,17z/data=!4m6!1m3!3m2!1s0x89c81a14e7817803:0xab20a0e99daa17ea!2sDavid+Chu's+China+Bistro!3m1!1s0x89c81a14e7817803:0xab20a0e99daa17ea"
        target="_blank">
 
       <div id="map-tile">
@@ -61,4 +86,5 @@
   </div>
 
 </div>
-```
+
+<!-- End of #home-tiles -->
