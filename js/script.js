@@ -1,597 +1,675 @@
 $(function () {
+
   $("#navbarToggle").blur(function (event) {
+
     var screenWidth = window.innerWidth;
+
     if (screenWidth < 768) {
+
       $("#collapsable-nav").collapse('hide');
+
     }
+
   });
+
 });
 
 
 (function (global) {
 
-var dc = {};
-var homeHtmlUrl = "snippets/home-snippet.html";
-var allCategoriesUrl =
-  "https://coursera-jhu-default-rtdb.firebaseio.com/categories.json";
-var categoriesTitleHtml = "snippets/categories-title-snippet.html";
-var categoryHtml = "snippets/category-snippet.html";
-var menuItemsUrl =
-  "https://coursera-jhu-default-rtdb.firebaseio.com/menu_items/";
-var menuItemsTitleHtml = "snippets/menu-items-title.html";
-var menuItemHtml = "snippets/menu-item.html";
+  var dc = {};
 
-var currentCategories = [];
+  var homeHtmlUrl =
+    "snippets/home-snippet.html";
 
+  var allCategoriesUrl =
+    "https://coursera-jhu-default-rtdb.firebaseio.com/categories.json";
 
-// Convenience function for inserting innerHTML
-var insertHtml = function (selector, html) {
-  var targetElem = document.querySelector(selector);
-  if (targetElem) {
-    targetElem.innerHTML = html;
-  }
-};
+  var categoriesTitleHtml =
+    "snippets/categories-title-snippet.html";
 
+  var categoryHtml =
+    "snippets/category-snippet.html";
 
-// Show loading icon
-var showLoading = function (selector) {
-  var html = "<div class='text-center'>";
-  html += "<img src='images/ajax-loader.gif'></div>";
-  insertHtml(selector, html);
-};
+  var menuItemsUrl =
+    "https://coursera-jhu-default-rtdb.firebaseio.com/menu_items/";
+
+  var menuItemsTitleHtml =
+    "snippets/menu-items-title.html";
+
+  var menuItemHtml =
+    "snippets/menu-item.html";
 
 
-// Return substitute of '{{propName}}'
-// with propValue in given 'string'
-var insertProperty = function (string, propName, propValue) {
-  var propToReplace = "{{" + propName + "}}";
+  var insertHtml = function (selector, html) {
 
-  string = string.replace(
-    new RegExp(propToReplace, "g"),
-    propValue
+    var targetElem =
+      document.querySelector(selector);
+
+    if (targetElem) {
+
+      targetElem.innerHTML = html;
+
+    }
+
+  };
+
+
+  var showLoading = function (selector) {
+
+    var html =
+      "<div class='text-center'>";
+
+    html +=
+      "<img src='images/ajax-loader.gif'>";
+
+    html +=
+      "</div>";
+
+    insertHtml(
+      selector,
+      html
+    );
+
+  };
+
+
+  var insertProperty =
+    function (string, propName, propValue) {
+
+      var propToReplace =
+        "{{" + propName + "}}";
+
+      string =
+        string.replace(
+          new RegExp(propToReplace, "g"),
+          propValue
+        );
+
+      return string;
+
+    };
+
+
+  var switchMenuToActive = function () {
+
+    var classes =
+      document.querySelector(
+        "#navHomeButton"
+      ).className;
+
+    classes =
+      classes.replace(
+        new RegExp("active", "g"),
+        ""
+      );
+
+    document.querySelector(
+      "#navHomeButton"
+    ).className = classes;
+
+
+    classes =
+      document.querySelector(
+        "#navMenuButton"
+      ).className;
+
+
+    if (classes.indexOf("active") === -1) {
+
+      classes += " active";
+
+      document.querySelector(
+        "#navMenuButton"
+      ).className = classes;
+
+    }
+
+  };
+
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    function (event) {
+
+      console.log(
+        "SCRIPT.JS LOADED"
+      );
+
+
+      showLoading(
+        "#main-content"
+      );
+
+
+      console.log(
+        "REQUESTING CATEGORIES..."
+      );
+
+
+      $ajaxUtils.sendGetRequest(
+
+        allCategoriesUrl,
+
+        buildAndShowHomeHTML,
+
+        true
+
+      );
+
+    }
+
   );
 
-  return string;
-};
+
+  function buildAndShowHomeHTML(categories) {
+
+    console.log(
+      "CATEGORIES RECEIVED:",
+      categories
+    );
 
 
-// Remove active from Home and activate Menu
-var switchMenuToActive = function () {
+    $ajaxUtils.sendGetRequest(
 
-  var classes = document.querySelector("#navHomeButton").className;
+      homeHtmlUrl,
 
-  classes = classes.replace(
-    new RegExp("active", "g"),
-    ""
-  );
+      function (homeHtml) {
 
-  document.querySelector("#navHomeButton").className = classes;
-
-
-  classes = document.querySelector("#navMenuButton").className;
-
-  if (classes.indexOf("active") === -1) {
-    classes += " active";
-    document.querySelector("#navMenuButton").className = classes;
-  }
-};
-
-
-// On page load
-document.addEventListener("DOMContentLoaded", function (event) {
-
-  showLoading("#main-content");
-
-  $ajaxUtils.sendGetRequest(
-    allCategoriesUrl,
-    buildAndShowHomeHTML,
-    true
-  );
-
-});
-
-
-// Builds HTML for the home page
-function buildAndShowHomeHTML(categories) {
-
-  currentCategories = categories;
-
-  $ajaxUtils.sendGetRequest(
-    homeHtmlUrl,
-
-    function (homeHtml) {
-
-      var chosenCategory =
-        chooseRandomCategory(categories);
-
-      var chosenCategoryShortName =
-        chosenCategory.short_name;
-
-
-      var homeHtmlToInsertIntoMainPage =
-        insertProperty(
-          homeHtml,
-          "randomCategoryShortName",
-          "'" + chosenCategoryShortName + "'"
+        console.log(
+          "HOME SNIPPET RECEIVED"
         );
 
 
-      insertHtml(
-        "#main-content",
-        homeHtmlToInsertIntoMainPage
-      );
+        var chosenCategory =
+          chooseRandomCategory(
+            categories
+          );
 
 
-      var randomText =
-        document.querySelector("#random-specials-text");
-
-      if (randomText) {
-        randomText.innerHTML =
-          "Random Pick: " + chosenCategory.name;
-      }
-
-    },
-
-    false
-  );
-}
+        var chosenCategoryShortName =
+          chosenCategory.short_name;
 
 
-// Choose random category
-function chooseRandomCategory(categories) {
-
-  var randomArrayIndex =
-    Math.floor(
-      Math.random() * categories.length
-    );
-
-  return categories[randomArrayIndex];
-}
+        console.log(
+          "RANDOM CATEGORY:",
+          chosenCategoryShortName
+        );
 
 
-// RANDOM AGAIN BUTTON
-dc.randomizeSpecials = function () {
+        var homeHtmlToInsertIntoMainPage =
+          insertProperty(
 
-  if (!currentCategories || currentCategories.length === 0) {
+            homeHtml,
 
-    $ajaxUtils.sendGetRequest(
-      allCategoriesUrl,
+            "randomCategoryShortName",
 
-      function (categories) {
+            "'" +
+            chosenCategoryShortName +
+            "'"
 
-        currentCategories = categories;
+          );
 
-        chooseAndUpdateSpecial();
+
+        console.log(
+          "FINAL HOME HTML:",
+          homeHtmlToInsertIntoMainPage
+        );
+
+
+        insertHtml(
+          "#main-content",
+          homeHtmlToInsertIntoMainPage
+        );
 
       },
 
-      true
-    );
+      false
 
-    return;
-  }
-
-
-  chooseAndUpdateSpecial();
-};
-
-
-function chooseAndUpdateSpecial() {
-
-  var chosenCategory =
-    chooseRandomCategory(currentCategories);
-
-  var chosenCategoryShortName =
-    chosenCategory.short_name;
-
-
-  var specialsLink =
-    document.querySelector("#specials-link");
-
-
-  if (specialsLink) {
-
-    specialsLink.setAttribute(
-      "onclick",
-      "$dc.loadMenuItems('" +
-      chosenCategoryShortName +
-      "'); return false;"
     );
 
   }
 
 
-  var randomText =
-    document.querySelector("#random-specials-text");
+  function chooseRandomCategory(categories) {
+
+    var randomArrayIndex =
+      Math.floor(
+        Math.random() *
+        categories.length
+      );
 
 
-  if (randomText) {
-
-    randomText.innerHTML =
-      "Random Pick: " +
-      chosenCategory.name;
+    return categories[
+      randomArrayIndex
+    ];
 
   }
 
-}
+
+  dc.loadMenuCategories =
+    function () {
+
+      showLoading(
+        "#main-content"
+      );
 
 
-// Load menu categories
-dc.loadMenuCategories = function () {
+      $ajaxUtils.sendGetRequest(
 
-  showLoading("#main-content");
+        allCategoriesUrl,
 
-  $ajaxUtils.sendGetRequest(
-    allCategoriesUrl,
-    buildAndShowCategoriesHTML
-  );
+        buildAndShowCategoriesHTML
 
-};
+      );
+
+    };
 
 
-// Load menu items
-dc.loadMenuItems = function (categoryShort) {
+  dc.loadMenuItems =
+    function (categoryShort) {
 
-  showLoading("#main-content");
-
-  $ajaxUtils.sendGetRequest(
-    menuItemsUrl +
-    categoryShort +
-    ".json",
-
-    buildAndShowMenuItemsHTML
-  );
-
-};
+      showLoading(
+        "#main-content"
+      );
 
 
-// Build categories HTML
-function buildAndShowCategoriesHTML(categories) {
+      $ajaxUtils.sendGetRequest(
 
-  $ajaxUtils.sendGetRequest(
+        menuItemsUrl +
+        categoryShort +
+        ".json",
 
+        buildAndShowMenuItemsHTML
+
+      );
+
+    };
+
+
+  function buildAndShowCategoriesHTML(categories) {
+
+    $ajaxUtils.sendGetRequest(
+
+      categoriesTitleHtml,
+
+      function (categoriesTitleHtml) {
+
+        $ajaxUtils.sendGetRequest(
+
+          categoryHtml,
+
+          function (categoryHtml) {
+
+            switchMenuToActive();
+
+
+            var categoriesViewHtml =
+              buildCategoriesViewHtml(
+
+                categories,
+
+                categoriesTitleHtml,
+
+                categoryHtml
+
+              );
+
+
+            insertHtml(
+
+              "#main-content",
+
+              categoriesViewHtml
+
+            );
+
+          },
+
+          false
+
+        );
+
+      },
+
+      false
+
+    );
+
+  }
+
+
+  function buildCategoriesViewHtml(
+    categories,
     categoriesTitleHtml,
-
-    function (categoriesTitleHtml) {
-
-      $ajaxUtils.sendGetRequest(
-
-        categoryHtml,
-
-        function (categoryHtml) {
-
-          switchMenuToActive();
-
-          var categoriesViewHtml =
-            buildCategoriesViewHtml(
-              categories,
-              categoriesTitleHtml,
-              categoryHtml
-            );
-
-          insertHtml(
-            "#main-content",
-            categoriesViewHtml
-          );
-
-        },
-
-        false
-      );
-
-    },
-
-    false
-  );
-
-}
-
-
-// Build categories view
-function buildCategoriesViewHtml(
-  categories,
-  categoriesTitleHtml,
-  categoryHtml
-) {
-
-  var finalHtml =
-    categoriesTitleHtml;
-
-  finalHtml +=
-    "<section class='row'>";
-
-
-  for (
-    var i = 0;
-    i < categories.length;
-    i++
+    categoryHtml
   ) {
 
-    var html =
-      categoryHtml;
+    var finalHtml =
+      categoriesTitleHtml;
 
-    var name =
-      "" + categories[i].name;
 
-    var short_name =
-      categories[i].short_name;
+    finalHtml +=
+      "<section class='row'>";
 
 
-    html =
-      insertProperty(
-        html,
-        "name",
-        name
-      );
+    for (
+      var i = 0;
+      i < categories.length;
+      i++
+    ) {
 
+      var html =
+        categoryHtml;
 
-    html =
-      insertProperty(
-        html,
-        "short_name",
-        short_name
-      );
 
+      var name =
+        "" + categories[i].name;
 
-    finalHtml += html;
 
-  }
+      var short_name =
+        categories[i].short_name;
 
 
-  finalHtml +=
-    "</section>";
+      html =
+        insertProperty(
+          html,
+          "name",
+          name
+        );
 
 
-  return finalHtml;
-}
+      html =
+        insertProperty(
+          html,
+          "short_name",
+          short_name
+        );
 
 
-// Build menu items HTML
-function buildAndShowMenuItemsHTML(
-  categoryMenuItems
-) {
-
-  $ajaxUtils.sendGetRequest(
-
-    menuItemsTitleHtml,
-
-    function (menuItemsTitleHtml) {
-
-      $ajaxUtils.sendGetRequest(
-
-        menuItemHtml,
-
-        function (menuItemHtml) {
-
-          switchMenuToActive();
-
-
-          var menuItemsViewHtml =
-            buildMenuItemsViewHtml(
-              categoryMenuItems,
-              menuItemsTitleHtml,
-              menuItemHtml
-            );
-
-
-          insertHtml(
-            "#main-content",
-            menuItemsViewHtml
-          );
-
-        },
-
-        false
-      );
-
-    },
-
-    false
-  );
-
-}
-
-
-// Build menu items view
-function buildMenuItemsViewHtml(
-  categoryMenuItems,
-  menuItemsTitleHtml,
-  menuItemHtml
-) {
-
-  menuItemsTitleHtml =
-    insertProperty(
-      menuItemsTitleHtml,
-      "name",
-      categoryMenuItems.category.name
-    );
-
-
-  menuItemsTitleHtml =
-    insertProperty(
-      menuItemsTitleHtml,
-      "special_instructions",
-      categoryMenuItems.category.special_instructions
-    );
-
-
-  var finalHtml =
-    menuItemsTitleHtml;
-
-  finalHtml +=
-    "<section class='row'>";
-
-
-  var menuItems =
-    categoryMenuItems.menu_items;
-
-  var catShortName =
-    categoryMenuItems.category.short_name;
-
-
-  for (
-    var i = 0;
-    i < menuItems.length;
-    i++
-  ) {
-
-    var html =
-      menuItemHtml;
-
-
-    html =
-      insertProperty(
-        html,
-        "short_name",
-        menuItems[i].short_name
-      );
-
-
-    html =
-      insertProperty(
-        html,
-        "catShortName",
-        catShortName
-      );
-
-
-    html =
-      insertItemPrice(
-        html,
-        "price_small",
-        menuItems[i].price_small
-      );
-
-
-    html =
-      insertItemPortionName(
-        html,
-        "small_portion_name",
-        menuItems[i].small_portion_name
-      );
-
-
-    html =
-      insertItemPrice(
-        html,
-        "price_large",
-        menuItems[i].price_large
-      );
-
-
-    html =
-      insertItemPortionName(
-        html,
-        "large_portion_name",
-        menuItems[i].large_portion_name
-      );
-
-
-    html =
-      insertProperty(
-        html,
-        "name",
-        menuItems[i].name
-      );
-
-
-    html =
-      insertProperty(
-        html,
-        "description",
-        menuItems[i].description
-      );
-
-
-    if (i % 2 !== 0) {
-
-      html +=
-        "<div class='clearfix visible-lg-block visible-md-block'></div>";
+      finalHtml +=
+        html;
 
     }
 
 
-    finalHtml += html;
+    finalHtml +=
+      "</section>";
+
+
+    return finalHtml;
 
   }
 
 
-  finalHtml +=
-    "</section>";
+  function buildAndShowMenuItemsHTML(
+    categoryMenuItems
+  ) {
+
+    $ajaxUtils.sendGetRequest(
+
+      menuItemsTitleHtml,
+
+      function (menuItemsTitleHtml) {
+
+        $ajaxUtils.sendGetRequest(
+
+          menuItemHtml,
+
+          function (menuItemHtml) {
+
+            switchMenuToActive();
 
 
-  return finalHtml;
-}
+            var menuItemsViewHtml =
+              buildMenuItemsViewHtml(
+
+                categoryMenuItems,
+
+                menuItemsTitleHtml,
+
+                menuItemHtml
+
+              );
 
 
-// Insert price
-function insertItemPrice(
-  html,
-  pricePropName,
-  priceValue
-) {
+            insertHtml(
 
-  if (!priceValue) {
+              "#main-content",
 
-    return insertProperty(
-      html,
-      pricePropName,
-      ""
+              menuItemsViewHtml
+
+            );
+
+          },
+
+          false
+
+        );
+
+      },
+
+      false
+
     );
 
   }
 
 
-  priceValue =
-    "$" + priceValue.toFixed(2);
+  function buildMenuItemsViewHtml(
+    categoryMenuItems,
+    menuItemsTitleHtml,
+    menuItemHtml
+  ) {
+
+    menuItemsTitleHtml =
+      insertProperty(
+
+        menuItemsTitleHtml,
+
+        "name",
+
+        categoryMenuItems.category.name
+
+      );
 
 
-  html =
-    insertProperty(
-      html,
-      pricePropName,
-      priceValue
-    );
+    menuItemsTitleHtml =
+      insertProperty(
+
+        menuItemsTitleHtml,
+
+        "special_instructions",
+
+        categoryMenuItems.category.special_instructions
+
+      );
 
 
-  return html;
-}
+    var finalHtml =
+      menuItemsTitleHtml;
 
 
-// Insert portion name
-function insertItemPortionName(
-  html,
-  portionPropName,
-  portionValue
-) {
+    finalHtml +=
+      "<section class='row'>";
 
-  if (!portionValue) {
 
-    return insertProperty(
-      html,
-      portionPropName,
-      ""
-    );
+    var menuItems =
+      categoryMenuItems.menu_items;
+
+
+    var catShortName =
+      categoryMenuItems.category.short_name;
+
+
+    for (
+      var i = 0;
+      i < menuItems.length;
+      i++
+    ) {
+
+      var html =
+        menuItemHtml;
+
+
+      html =
+        insertProperty(
+          html,
+          "short_name",
+          menuItems[i].short_name
+        );
+
+
+      html =
+        insertProperty(
+          html,
+          "catShortName",
+          catShortName
+        );
+
+
+      html =
+        insertItemPrice(
+          html,
+          "price_small",
+          menuItems[i].price_small
+        );
+
+
+      html =
+        insertItemPortionName(
+          html,
+          "small_portion_name",
+          menuItems[i].small_portion_name
+        );
+
+
+      html =
+        insertItemPrice(
+          html,
+          "price_large",
+          menuItems[i].price_large
+        );
+
+
+      html =
+        insertItemPortionName(
+          html,
+          "large_portion_name",
+          menuItems[i].large_portion_name
+        );
+
+
+      html =
+        insertProperty(
+          html,
+          "name",
+          menuItems[i].name
+        );
+
+
+      html =
+        insertProperty(
+          html,
+          "description",
+          menuItems[i].description
+        );
+
+
+      if (i % 2 !== 0) {
+
+        html +=
+          "<div class='clearfix visible-lg-block visible-md-block'></div>";
+
+      }
+
+
+      finalHtml +=
+        html;
+
+    }
+
+
+    finalHtml +=
+      "</section>";
+
+
+    return finalHtml;
 
   }
 
 
-  portionValue =
-    "(" + portionValue + ")";
+  function insertItemPrice(
+    html,
+    pricePropName,
+    priceValue
+  ) {
+
+    if (!priceValue) {
+
+      return insertProperty(
+        html,
+        pricePropName,
+        ""
+      );
+
+    }
 
 
-  html =
-    insertProperty(
-      html,
-      portionPropName,
-      portionValue
-    );
+    priceValue =
+      "$" +
+      priceValue.toFixed(2);
 
 
-  return html;
-}
+    html =
+      insertProperty(
+        html,
+        pricePropName,
+        priceValue
+      );
 
 
-global.$dc = dc;
+    return html;
+
+  }
+
+
+  function insertItemPortionName(
+    html,
+    portionPropName,
+    portionValue
+  ) {
+
+    if (!portionValue) {
+
+      return insertProperty(
+        html,
+        portionPropName,
+        ""
+      );
+
+    }
+
+
+    portionValue =
+      "(" +
+      portionValue +
+      ")";
+
+
+    html =
+      insertProperty(
+        html,
+        portionPropName,
+        portionValue
+      );
+
+
+    return html;
+
+  }
+
+
+  global.$dc = dc;
 
 })(window);
