@@ -20,7 +20,7 @@
 
 
   ajaxUtils.sendGetRequest =
-    function(requestUrl, responseHandler, isJsonResponse) {
+    function (requestUrl, responseHandler, isJsonResponse) {
 
       var request = getRequestObject();
 
@@ -30,17 +30,9 @@
 
 
       request.onreadystatechange =
-        function() {
+        function () {
 
           if (request.readyState == 4) {
-
-            console.log(
-              "AJAX:",
-              requestUrl,
-              "STATUS:",
-              request.status
-            );
-
 
             if (request.status == 200) {
 
@@ -62,7 +54,7 @@
                 catch (error) {
 
                   console.error(
-                    "JSON ERROR:",
+                    "JSON parsing error:",
                     error
                   );
 
@@ -83,9 +75,9 @@
             else {
 
               console.error(
-                "AJAX REQUEST FAILED:",
+                "Request failed:",
                 requestUrl,
-                "STATUS:",
+                "Status:",
                 request.status
               );
 
